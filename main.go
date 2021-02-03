@@ -34,6 +34,7 @@ func main() {
 	if err != nil {
 		println(err)
 	}
+	defer f.Close()
 
 	data := &discordgo.MessageSend{
 		Files: []*discordgo.File{
