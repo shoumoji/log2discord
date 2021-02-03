@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,9 +22,6 @@ func main() {
 	// どのディレクトリをDiscordに出力するか引数で選択
 	logDir := os.Args[1]
 
-	err = filepath.Walk(logDir, func(path string, info os.FileInfo, err error) {
-
-	})
 	//discordと接続
 	discord, err := discordgo.New("Bot " + Token)
 	if err != nil {
@@ -35,6 +32,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = filepath.Walk(logDir, func(file string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Println("prevent panic by handling failure accessing a path %q: %v\n", file, err)
+		}
+		sendMessageDiscordLogChannel(discord, logChannelID, file)
+		return nil
+	})
+}
+
+func sendMessageDiscordLogChannel(discord *discordgo.Session, logChannelID string, path string) {
 	if utf8.RuneCountInString(event.Name+"\n\n"+readData) <= 1999 {
 		// logディレクトリに追加されたファイルをdiscordに送信
 		discord.ChannelMessageSend(logChannelID, event.Name+"\n\n"+readData)
@@ -53,21 +60,4 @@ func main() {
 		}
 		discord.ChannelMessageSend(logChannelID, "-----------分割終了----------")
 	}
-}
-
-func dirWalk(dir string) []string {
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var paths []string
-	for _, file := range files {
-		if file.IsDir() {
-			paths = append(paths, dirWalk(filepath.Join(dir, file.Name()))...)
-			continue
-		}
-		paths = append(paths, filepath.Join(dir, file.Name()))
-	}
-	return paths
 }

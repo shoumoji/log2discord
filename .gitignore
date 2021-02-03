@@ -16,3 +16,6 @@
 
 # ignore env file
 .env
+
+# ignore test dir
+testdir
